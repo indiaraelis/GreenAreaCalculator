@@ -1,4 +1,4 @@
-[general]
+"""[general]
 name=GreenAreaCalculator
 qgisMinimumVersion=3.16
 description=Calculates green vegetation areas per census sector using NDVI analysis
@@ -9,6 +9,7 @@ about=This plugin calculates green area percentages for census sectors using ras
 changelog=Initial release with basic functionality for green area calculation
 tracker=https://github.com/indiaraelis/GreenAreaCalculator/issues
 repository=https://github.com/indiaraelis/GreenAreaCalculator/
+homepage=https://github.com/indiaraelis/GreenAreaCalculator
 license=GPLv2 or later
 category=Vector
 tags=vegetation,ndvi,census,statistics,green areas
@@ -17,3 +18,4 @@ tags=vegetation,ndvi,census,statistics,green areas
 pluginClass=main_plugin.GreenAreaCalculatorPlugin
 
 [settings]
+"""
