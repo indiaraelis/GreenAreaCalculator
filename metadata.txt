@@ -1,64 +1,31 @@
 [general]
 name=Green Area Calculator
-qgisMinimumVersion=3.16
-description=Calculates green vegetation areas per census sector using NDVI analysis and spatial statistics. This plugin analyzes multispectral imagery to determine vegetation coverage within demographic boundaries, providing statistical analysis and visualization tools for urban planning and environmental assessment.
-
-Requirements:
-- Multispectral raster data with red and near-infrared bands
-- Census sector polygon data
-- Consistent coordinate reference system between all layers
-
-The plugin works on all supported platforms (Windows, Linux, macOS) and uses only standard QGIS libraries without external dependencies.
-
+qgisMinimumVersion=3.0
+description=Calculates the proportion of green areas within census sectors
 version=1.0.0
 author=Indiara Elis
 email=indiaraelis@gmail.com
 
-about=Green Area Calculator is a QGIS plugin designed for urban planners, environmental researchers, and GIS professionals who need to analyze vegetation coverage within specific demographic areas. 
+about=This plugin calculates green area coverage within census sectors using NDVI analysis.
 
-The plugin performs NDVI (Normalized Difference Vegetation Index) calculations on multispectral imagery and intersects the results with census sector boundaries to provide detailed statistics about green area coverage per sector.
-
-Key Features:
-• NDVI-based vegetation analysis
-• Automated calculation per census sector
-• Statistical reporting and visualization
-• Support for multiple raster and vector formats
-• Cross-platform compatibility
-• Intuitive user interface
-
-The plugin requires multispectral raster data containing at least red and near-infrared bands, along with polygon data representing census sectors or other administrative boundaries. All data should be in the same coordinate reference system for accurate analysis.
-
-This tool is particularly useful for:
-- Urban green space assessment
-- Environmental impact studies
-- Land use planning
-- Academic research in urban ecology
-- Government reporting on green infrastructure
-
-changelog=Version 1.0.0 (2025-01-XX):
-- Initial release
-- Basic NDVI calculation functionality
-- Census sector statistics integration
-- User-friendly dialog interface
-- Multi-format data support
-- Cross-platform compatibility
-
-tracker=https://github.com/indiaraelis/GreenAreaCalculator/issues
 repository=https://github.com/indiaraelis/GreenAreaCalculator
+tracker=https://github.com/indiaraelis/GreenAreaCalculator/issues
 homepage=https://github.com/indiaraelis/GreenAreaCalculator
 
-license=GPL v2 or later
 category=Vector
-tags=vegetation,ndvi,census,statistics,green areas,urban planning,environmental analysis,spatial analysis
+icon=icon.png
 
-# Experimental flag - set to False for stable release
 experimental=False
-
-# Deprecated flag - set to False unless plugin is deprecated
 deprecated=False
 
-# Server settings (optional)
-server=False
+tags=vegetation,census,urban,analysis,ndvi
 
-[python]
-pluginClass=main_plugin.GreenAreaCalculatorPlugin
+changelog=1.0.0 2023-09-02
+    * Initial release
+    * Basic NDVI calculation
+    * Census sector statistics
+    * User-friendly interface
+    * Multi-format support
+
+hasProcessingProvider=no
+server=False
