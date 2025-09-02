@@ -3,8 +3,9 @@
 ![QGIS Version](https://img.shields.io/badge/QGIS-3.16%2B-green.svg)
 ![License](https://img.shields.io/badge/License-GPLv2-blue.svg)
 ![Python](https://img.shields.io/badge/Python-3.7%2B-yellow.svg)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)
 
-A powerful QGIS plugin for calculating green vegetation areas per census sector using advanced NDVI analysis and spatial statistics.
+A QGIS plugin for calculating green vegetation areas per census sector using NDVI analysis and spatial statistics.
 
 ## 🌟 Features
 
@@ -12,24 +13,19 @@ A powerful QGIS plugin for calculating green vegetation areas per census sector 
 - **NDVI-based Analysis**: Calculate vegetation indices from multispectral imagery
 - **Sector Statistics**: Automated green area calculation per census sector
 - **Cross-Platform**: Compatible with Windows, Linux, and macOS
-- **User-Friendly Interface**: Intuitive dialog-based workflow
+- **User-Friendly Interface**: Simple dialog-based workflow
 
 ### Technical Features
 - **Multi-format Support**: Works with various raster and vector formats
-- **Batch Processing**: Handle multiple sectors efficiently
-- **Custom Thresholding**: Adjustable NDVI thresholds for different vegetation types
-- **Export Capabilities**: Generate reports and export results to multiple formats
-
-### Visualization
-- **Thematic Mapping**: Automatic classification and coloring of results
-- **Statistical Charts**: Visual representation of green area distribution
-- **Interactive Results**: Click-to-query functionality for detailed sector information
+- **Custom Thresholding**: Adjustable NDVI parameters for different vegetation types
+- **Real-time Validation**: Visual feedback for layer selection
+- **Progress Tracking**: Built-in progress indicators for long operations
 
 ## 📦 Installation
 
 ### From QGIS Plugin Repository (Recommended)
 1. Open QGIS
-2. Go to `Plugins` > `Manage and Install Plugins...`
+2. Go to `Plugins` → `Manage and Install Plugins...`
 3. Search for "Green Area Calculator"
 4. Click `Install Plugin`
 5. Restart QGIS if prompted
@@ -41,204 +37,155 @@ A powerful QGIS plugin for calculating green vegetation areas per census sector 
    - **Linux**: `~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/`
    - **macOS**: `~/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins/`
 3. Restart QGIS
-4. Enable the plugin in `Plugins` > `Manage and Install Plugins...`
+4. Enable the plugin in `Plugins` → `Manage and Install Plugins...`
 
 ### Development Installation
 ```bash
 git clone https://github.com/indiaraelis/GreenAreaCalculator.git
 cd GreenAreaCalculator
-# The plugin will be available after QGIS restart
+# Copy to QGIS plugins directory
 ```
 
 ## 🚀 Usage
 
 ### Basic Workflow
 1. **Prepare Data**:
-   - Load census sector polygon layer (Shapefile, GeoPackage, etc.)
-   - Load vegetation raster layer (GeoTIFF, IMG, etc.) with infrared band
+   - Load census sector polygon layer
+   - Load multispectral raster with red and near-infrared bands
 
 2. **Open Plugin**:
-   - Go to `Vector` > `Green Area Calculator`
-   - Or click the toolbar icon 🌿
+   - Go to `Vector` → `Green Area Calculator`
+   - Or use the toolbar icon 🌿
 
-3. **Configure Parameters**:
+3. **Configure Analysis**:
    - Select census layer from dropdown
    - Select vegetation raster layer
-   - Adjust NDVI thresholds if needed
-   - Set output parameters
+   - Both layers must have the same coordinate system
 
-4. **Execute Analysis**:
+4. **Execute Calculation**:
    - Click `Calculate` button
-   - Monitor progress in the status bar
-   - View results in the output panel
+   - Monitor progress in the dialog
+   - Results will be added to QGIS
 
-5. **Review Results**:
-   - New layer with statistics added to QGIS
-   - Visualize green area distribution
-   - Export results if needed
+### Step-by-Step Guide
 
-### Advanced Configuration
+#### 1. Data Preparation
+Ensure your data meets these requirements:
+- **Census Layer**: Polygon vector layer (Shapefile, GeoPackage, etc.)
+- **Vegetation Layer**: Multispectral raster with bands for NDVI calculation
+- **Coordinate System**: Both layers should use the same CRS
 
-#### NDVI Threshold Settings
-```python
-# Default NDVI thresholds
-urban_area = -0.1 to 0.2
-sparse_vegetation = 0.2 to 0.4
-dense_vegetation = 0.4 to 1.0
-```
+#### 2. Plugin Interface
+The plugin dialog contains:
+- **Census Sectors Layer**: Dropdown to select polygon layer
+- **Vegetation Layer**: Dropdown to select raster layer
+- **Calculate Button**: Starts the analysis (enabled when both layers selected)
+- **Progress Bar**: Shows calculation progress
 
-#### Output Options
-- **Statistical Summary**: CSV export with detailed metrics
-- **Thematic Maps**: Pre-configured symbology for quick visualization
-- **Attribute Table**: Enhanced data table with calculated fields
+#### 3. Results
+After calculation:
+- New attributes added to census layer with green area statistics
+- Success message displayed in QGIS message bar
+- Results available for visualization and export
 
 ## 📋 Requirements
 
 ### Software Requirements
 - **QGIS**: Version 3.16 or higher
 - **Python**: 3.7 or higher (included with QGIS)
-- **GDAL**: 3.0 or higher (included with QGIS)
+- **Operating System**: Windows, Linux, or macOS
 
 ### Data Requirements
-- **Census Data**: Polygon layer with census sector boundaries
-- **Imagery Data**: Multispectral raster with:
-  - Red band (typically band 3 or 4)
-  - Near-Infrared band (typically band 4 or 5)
+- **Census Data**: Polygon layer with sector boundaries
+- **Imagery Data**: Raster layer with vegetation information
 - **Coordinate System**: Consistent CRS between all layers
 
 ### System Requirements
 - **RAM**: Minimum 4GB (8GB recommended for large datasets)
-- **Storage**: Sufficient space for temporary files and results
-- **Processing**: Multi-core support for faster computation
+- **Storage**: Sufficient space for temporary processing files
+- **Processing**: Multi-core support improves performance
 
 ## 🛠️ Configuration
 
-### Plugin Settings
-Access settings through QGIS preferences:
-1. Go to `Settings` > `Options` > `Advanced` > `Green Area Calculator`
-2. Adjust default parameters:
-   - NDVI thresholds
-   - Output directory
-   - Temporary file handling
-   - Memory usage limits
+The plugin uses standard QGIS libraries and requires no external dependencies. All configuration is done through the simple dialog interface.
 
-### Customizing Analysis
-```python
-# Example of custom NDVI thresholds
-plugin.set_ndvi_thresholds(
-    urban_max=0.2,
-    sparse_min=0.2,
-    sparse_max=0.4,
-    dense_min=0.4
-)
-```
+### Default Settings
+- NDVI calculation uses standard red and near-infrared bands
+- Progress feedback provided during calculation
+- Results integrated directly into QGIS project
 
-## 📊 Outputs
+## 📊 Output
 
-### Generated Layers
-- **Green Area Statistics**: Polygon layer with calculated metrics
-- **NDVI Raster**: Calculated vegetation index layer (optional)
-- **Classification Map**: Thematic raster of vegetation density
+### Generated Data
+- **Enhanced Census Layer**: Original layer with added green area statistics
+- **Calculation Results**: Percentage and area measurements per sector
+- **QGIS Integration**: Results immediately available for mapping and analysis
 
-### Statistical Outputs
-- **Percentage of green area** per census sector
-- **Total green area** in square meters/kilometers
-- **Vegetation density distribution**
-- **Comparative statistics** between sectors
-
-### Export Formats
-- **GeoJSON**: For web mapping applications
-- **CSV**: For statistical analysis in external software
-- **PDF**: Printable reports with charts and maps
-- **Shapefile**: Compatible with most GIS software
+### Supported Formats
+Input layers can be in any format supported by QGIS:
+- **Vector**: Shapefile, GeoPackage, PostGIS, etc.
+- **Raster**: GeoTIFF, IMG, ERDAS, etc.
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
-#### "No valid layers found"
-- Ensure layers are properly loaded in QGIS
-- Check that layers have compatible coordinate systems
-- Verify that raster has required bands
+#### "No layers available"
+- **Solution**: Load vector and raster layers into QGIS before opening the plugin
+- **Check**: Ensure layers are valid and properly loaded
 
-#### "NDVI calculation failed"
-- Confirm raster has infrared and red bands
-- Check for NoData values in input raster
-- Verify raster pixel values are valid
+#### "Please select both layers"
+- **Solution**: Select both census and vegetation layers from dropdowns
+- **Verify**: Both dropdowns show layer names, not empty selections
 
-#### Performance issues
-- Use smaller tile sizes for large datasets
-- Increase available memory in plugin settings
-- Consider preprocessing large rasters
+#### Plugin doesn't appear in menu
+- **Solution**: Enable plugin in `Plugins` → `Manage and Install Plugins...`
+- **Check**: Plugin is installed in correct QGIS plugins directory
 
-### Error Messages
-| Error Message | Solution |
-|---------------|----------|
-| "Invalid raster format" | Convert to GeoTIFF or compatible format |
-| "Coordinate system mismatch" | Reproject layers to common CRS |
-| "Insufficient memory" | Reduce processing tile size |
-| "No infrared band found" | Check raster band configuration |
+### Performance Tips
+- Use appropriate raster resolution for your analysis area
+- Ensure sufficient system memory for large datasets
+- Close unnecessary applications during processing
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our contributing guidelines:
+We welcome contributions! Here's how to get started:
 
 ### Development Setup
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/new-feature`
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+2. Clone your fork: `git clone https://github.com/yourusername/GreenAreaCalculator.git`
+3. Create feature branch: `git checkout -b feature/new-feature`
+4. Make changes and test
+5. Submit pull request
 
 ### Code Standards
 - Follow PEP 8 guidelines
-- Use descriptive variable names
-- Add comments for complex logic
-- Include type hints where appropriate
+- Use English for comments and documentation  
+- Test on multiple platforms when possible
+- Add appropriate error handling
 
-### Testing
-```bash
-# Run basic tests
-python -m pytest tests/
-
-# Test specific functionality
-python test_calculation.py
-```
-
-## 📝 Changelog
-
-### Version 1.0.0
-- Initial release with basic functionality
-- NDVI-based green area calculation
-- Census sector statistics
-- Basic export capabilities
-
-### Upcoming Features
-- Machine learning classification
-- Time series analysis
-- Advanced visualization options
-- Cloud processing integration
+### Reporting Issues
+- Use [GitHub Issues](https://github.com/indiaraelis/GreenAreaCalculator/issues)
+- Include QGIS version, operating system, and error details
+- Provide sample data if possible
 
 ## 📄 License
 
-This project is licensed under the GNU General Public License v2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU General Public License v2.0 or later - see the [LICENSE](LICENSE) file for details.
 
 ## 🙋‍♂️ Support
 
 ### Documentation
-- [User Guide](docs/user_guide.md)
-- [API Reference](docs/api.md)
-- [Tutorials](docs/tutorials/)
+- [User Guide](https://github.com/indiaraelis/GreenAreaCalculator/wiki)
+- [API Documentation](https://github.com/indiaraelis/GreenAreaCalculator/wiki/API)
 
 ### Community Support
-- [QGIS Forum](https://forum.qgis.org/)
 - [GitHub Issues](https://github.com/indiaraelis/GreenAreaCalculator/issues)
-- [Stack Overflow](https://stackoverflow.com/questions/tagged/qgis+plugin)
+- [QGIS Community Forum](https://forum.qgis.org/)
 
-### Professional Support
-For enterprise support and custom development, contact: 
+### Contact
 - **Email**: indiaraelis@gmail.com
-- **LinkedIn**: [Your Website](https://www.linkedin.com/in/indiaraelis/)
+- **GitHub**: [@indiaraelis](https://github.com/indiaraelis)
 
 ## 🔗 Related Projects
 
@@ -251,22 +198,20 @@ For enterprise support and custom development, contact:
 If you use this plugin in your research, please cite:
 
 ```bibtex
-@software{GreenAreaCalculator2024,
+@software{GreenAreaCalculator2025,
   author = {Elis, Indiara},
   title = {Green Area Calculator: QGIS Plugin for Vegetation Analysis},
   year = {2025},
   publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{https://github.com/indiaraelis/GreenAreaCalculator}}
+  url = {https://github.com/indiaraelis/GreenAreaCalculator}
 }
 ```
 
 ## 🌐 Links
 
 - **GitHub Repository**: https://github.com/indiaraelis/GreenAreaCalculator
-- **QGIS Plugin Page**: https://plugins.qgis.org/plugins/GreenAreaCalculator/
 - **Issue Tracker**: https://github.com/indiaraelis/GreenAreaCalculator/issues
-- **Documentation**: https://github.com/indiaraelis/GreenAreaCalculator/wiki
+- **QGIS Plugin Repository**: https://plugins.qgis.org/plugins/GreenAreaCalculator/
 
 ---
 

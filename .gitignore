@@ -1,0 +1,15 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Generated files
+ui_*.py
+*_rc.py
+resources_rc.py
+
+# Hidden directories
+.git/
+__MACOSX/
+
+# IDE
+.vscode/

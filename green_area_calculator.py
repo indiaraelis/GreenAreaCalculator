@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Green Area Calculator Dialog
-Main calculation logic and user interface
-Author: Indiara Elis
-License: GPLv2 or later
+Main calculation logic and user interface for vegetation analysis
 """
 
 import os
@@ -16,128 +14,87 @@ from qgis.core import (
 )
 from qgis.gui import QgsMessageBar
 
-# Import UI class
 from .ui_green_area_calculator_dialog import Ui_GreenAreaCalculatorDialog
 
 
 class GreenAreaCalculatorDialog(QtWidgets.QDialog, Ui_GreenAreaCalculatorDialog):
-    """Main dialog for Green Area Calculator plugin."""
+    """Dialog principal do plugin."""
     
     def __init__(self, iface, parent=None):
-        """Initialize dialog with QGIS interface.
-        
-        Args:
-            iface: QGIS interface object
-            parent: Parent widget (optional)
-        """
         super().__init__(parent)
         self.setupUi(self)
         self.iface = iface
         self.setWindowTitle("Green Area Calculator")
         
-        # Set up UI enhancements
-        self.setup_ui_enhancements()
+        self._setup_connections()
+        self._load_layers()
         
-        # Check available layers on startup
-        self.check_available_layers()
-        
-        QgsMessageLog.logMessage(
-            "Green Area Calculator dialog initialized", 
-            "GreenAreaCalculator", 
-            Qgis.Info
-        )
+        # Initialize logging
+        QgsMessageLog.logMessage("Dialog initialized", "GreenAreaCalculator", Qgis.Info)
 
-    def setup_ui_enhancements(self):
-        """Set up UI enhancements and signal connections."""
-        # Connect signals
-        self.comboCensusLayer.currentIndexChanged.connect(self.on_layer_selected)
-        self.comboVegetationLayer.currentIndexChanged.connect(self.on_layer_selected)
-        self.buttonCalculate.clicked.connect(self.calculate_areas)
+    def _setup_connections(self):
+        """Connect UI signals and setup interface elements."""
+        self.comboCensusLayer.currentIndexChanged.connect(self._on_layer_change)
+        self.comboVegetationLayer.currentIndexChanged.connect(self._on_layer_change)
+        self.buttonCalculate.clicked.connect(self.run_calculation)
         
-        # Set up progress bar
+        # Hide progress bar initially
         self.progressBar.setVisible(False)
         
         # Set placeholder texts
-        self.comboCensusLayer.setPlaceholderText("Select census sector layer")
+        self.comboCensusLayer.setPlaceholderText("Select census layer")
         self.comboVegetationLayer.setPlaceholderText("Select vegetation layer")
 
-    def check_available_layers(self):
-        """Check and update available layers in comboboxes."""
-        try:
-            layers = QgsProject.instance().mapLayers().values()
-            
-            # Filter layers by type
-            vector_layers = [
-                layer for layer in layers 
-                if isinstance(layer, QgsVectorLayer)
-            ]
-            raster_layers = [
-                layer for layer in layers 
-                if isinstance(layer, QgsRasterLayer)
-            ]
-            
-            # Update comboboxes
-            self.update_layer_combobox(
-                self.comboCensusLayer, 
-                vector_layers, 
-                "Select census layer"
-            )
-            self.update_layer_combobox(
-                self.comboVegetationLayer, 
-                raster_layers + vector_layers, 
-                "Select vegetation layer"
-            )
-            
-            # Update status indicators
-            self.update_status_indicator()
-            
-        except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error checking available layers: {str(e)}", 
-                "GreenAreaCalculator", 
-                Qgis.Warning
-            )
+    def _load_layers(self):
+        """Load available layers into combo boxes."""
+        project = QgsProject.instance()
+        layers = project.mapLayers().values()
+        
+        # Separate vector and raster layers
+        vectors = [l for l in layers if isinstance(l, QgsVectorLayer)]
+        rasters = [l for l in layers if isinstance(l, QgsRasterLayer)]
+        
+        self._populate_combo(self.comboCensusLayer, vectors, "No vector layers available")
+        self._populate_combo(self.comboVegetationLayer, rasters + vectors, "No layers available")
+        
+        self._update_button_state()
 
-    def update_layer_combobox(self, combobox, layers, placeholder):
-        """Update layer combobox with available layers.
+    def _populate_combo(self, combo, layers, empty_msg):
+        """Populate combo box with available layers."""
+        combo.clear()
+        combo.addItem("")  # Empty selection
         
-        Args:
-            combobox: QComboBox to update
-            layers: List of QGIS layers
-            placeholder: Placeholder text when no layers available
-        """
-        combobox.clear()
-        combobox.addItem("")  # Empty selection
-        
+        if not layers:
+            combo.setPlaceholderText(empty_msg)
+            return
+            
         for layer in layers:
-            combobox.addItem(layer.name(), layer)
-            
-        if combobox.count() == 1:  # Only empty item
-            combobox.setPlaceholderText(f"No layers available - {placeholder}")
+            combo.addItem(layer.name(), layer)
+
+    def _update_button_state(self):
+        """Update button state based on layer selection."""
+        census_ok = self.comboCensusLayer.currentText() != ""
+        veg_ok = self.comboVegetationLayer.currentText() != ""
+        
+        self.buttonCalculate.setEnabled(census_ok and veg_ok)
+        
+        # Simple visual feedback
+        if census_ok:
+            self.labelCensus.setStyleSheet("color: green; font-weight: bold;")
         else:
-            combobox.setPlaceholderText(placeholder)
+            self.labelCensus.setStyleSheet("color: #666;")
+            
+        if veg_ok:
+            self.labelVegetation.setStyleSheet("color: green; font-weight: bold;")
+        else:
+            self.labelVegetation.setStyleSheet("color: #666;")
 
-    def update_status_indicator(self):
-        """Update visual status indicators based on layer selection."""
-        census_selected = self.comboCensusLayer.currentText() != ""
-        vegetation_selected = self.comboVegetationLayer.currentText() != ""
-        
-        # Update button state
-        self.buttonCalculate.setEnabled(census_selected and vegetation_selected)
-        
-        # Visual feedback
-        census_style = "color: green; font-weight: bold;" if census_selected else "color: red;"
-        vegetation_style = "color: green; font-weight: bold;" if vegetation_selected else "color: red;"
-        
-        self.labelCensus.setStyleSheet(census_style)
-        self.labelVegetation.setStyleSheet(vegetation_style)
+    def _on_layer_change(self):
+        """Handle layer selection changes."""
+        self._update_button_state()
 
-    def on_layer_selected(self):
-        """Handle layer selection change."""
-        self.update_status_indicator()
-
-    def calculate_areas(self):
-        """Main calculation method with proper error handling."""
+    def run_calculation(self):
+        """Execute the main calculation process."""
         try:
             # Show progress indicator
             self.progressBar.setVisible(True)
@@ -145,20 +102,18 @@ class GreenAreaCalculatorDialog(QtWidgets.QDialog, Ui_GreenAreaCalculatorDialog)
             self.buttonCalculate.setEnabled(False)
             QtWidgets.QApplication.processEvents()
             
-            # Get selected layers
-            census_layer = self.get_selected_layer(self.comboCensusLayer)
-            vegetation_layer = self.get_selected_layer(self.comboVegetationLayer)
+            census_layer = self._get_selected_layer(self.comboCensusLayer)
+            veg_layer = self._get_selected_layer(self.comboVegetationLayer)
             
-            if not census_layer or not vegetation_layer:
-                raise ValueError("Please select both census and vegetation layers")
+            if not census_layer or not veg_layer:
+                raise ValueError("Please select both layers before calculating")
             
-            # Perform calculation (implement your logic here)
-            result = self.perform_calculation(census_layer, vegetation_layer)
+            # Perform the actual calculation
+            result = self._do_calculation(census_layer, veg_layer)
             
-            # Show success message
             self.iface.messageBar().pushMessage(
                 "Success", 
-                "Green area calculation completed", 
+                "Green area calculation completed successfully", 
                 level=Qgis.Success, 
                 duration=3
             )
@@ -166,75 +121,42 @@ class GreenAreaCalculatorDialog(QtWidgets.QDialog, Ui_GreenAreaCalculatorDialog)
             return result
             
         except Exception as e:
-            # Handle errors gracefully
             error_msg = f"Calculation error: {str(e)}"
             self.iface.messageBar().pushMessage(
-                "Error", 
-                error_msg, 
-                level=Qgis.Critical, 
-                duration=5
+                "Error", error_msg, level=Qgis.Critical, duration=5
             )
-            QgsMessageLog.logMessage(
-                error_msg, 
-                "GreenAreaCalculator", 
-                Qgis.Critical
-            )
+            QgsMessageLog.logMessage(error_msg, "GreenAreaCalculator", Qgis.Critical)
             return None
             
         finally:
-            # Clean up UI
+            # UI cleanup
             self.progressBar.setVisible(False)
             self.buttonCalculate.setEnabled(True)
 
-    def get_selected_layer(self, combobox):
-        """Get selected layer from combobox.
-        
-        Args:
-            combobox: QComboBox containing layers
-            
-        Returns:
-            QgsMapLayer or None: Selected layer or None if not available
-        """
-        if combobox.currentIndex() > 0:  # Not the empty item
-            return combobox.currentData()
+    def _get_selected_layer(self, combo):
+        """Get the selected layer from combo box."""
+        if combo.currentIndex() > 0:
+            return combo.currentData()
         return None
 
-    def perform_calculation(self, census_layer, vegetation_layer):
-        """Perform the actual green area calculation.
-        
-        Args:
-            census_layer: QgsVectorLayer with census sectors
-            vegetation_layer: QgsRasterLayer with vegetation data
-            
-        Returns:
-            dict: Calculation results
-        """
-        # Implement your calculation logic here
-        # This is where your NDVI/vegetation analysis goes
+    def _do_calculation(self, census_layer, veg_layer):
+        """Perform the actual green area calculation logic here."""
+        # TODO: Implement your NDVI/vegetation analysis logic
         
         QgsMessageLog.logMessage(
-            f"Calculating green areas for {census_layer.name()} "
-            f"using {vegetation_layer.name()}", 
+            f"Calculating green areas for {census_layer.name()} using {veg_layer.name()}", 
             "GreenAreaCalculator", 
             Qgis.Info
         )
         
-        # Placeholder - replace with actual calculation
+        # Placeholder for actual calculation
         return {
             "status": "success",
             "message": "Calculation completed",
-            "data": {}  # Your result data here
+            "data": {}
         }
 
     def closeEvent(self, event):
-        """Handle dialog close event.
-        
-        Args:
-            event: Close event
-        """
-        QgsMessageLog.logMessage(
-            "Green Area Calculator dialog closed", 
-            "GreenAreaCalculator", 
-            Qgis.Info
-        )
+        """Handle dialog close event."""
+        QgsMessageLog.logMessage("Dialog closed", "GreenAreaCalculator", Qgis.Info)
         event.accept()
